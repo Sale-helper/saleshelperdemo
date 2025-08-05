@@ -1,0 +1,53 @@
+// Import Inter font from Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// Background colors
+$background-primary: #23232C;    // Main application background
+$background-sidebar: #1A1C21;    // Sidebar background
+$background-dropdown: #2D2E40;   // Dropdowns, modals
+
+// Interactive colors
+$hover-dropdown: #2D2E40;        // Hover state for dropdowns
+$hover-recording: #2D2E40;      // Hover state for recording button
+$hover-stopped: #2D2E40;        // Hover state for stopped button
+$hover-button: #2D2E40;        // Hover state for buttons
+
+// Status colors
+$status-recording: #95F2D9;        // Recorder active
+$status-stopped: #E6BA85;         // Recorder stopped
+
+//text colors
+$text-gray: #9499A5;     // for h1
+$text-purple: #767692;   // for h2, h3
+$text-white: #FFFFFF;    // for paragraph
+
+h1 {
+    color: $text-gray;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+h2 {
+    color: $text-purple;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+h3 {
+    color: $text-purple;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+p {
+    color: $text-white;
+    font-size: 16px;
+    font-weight: 400;
+}

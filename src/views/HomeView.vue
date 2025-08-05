@@ -1,9 +1,18 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+    <div class="sidebar">
+     
+    </div>
 </template>
+
+<style scoped>
+.sidebar {
+  width: 400px;
+  height: 100vh;
+  background-color: #1A1C21;
+  flex-shrink: 0;
+}
+</style>
