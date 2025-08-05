@@ -1,10 +1,17 @@
 <script setup>
 import DropdownBtn from '@/components/DropdownBtn.vue'
+import { ref } from 'vue'
+
+const isDropdownOpen = ref(false)
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+}
 </script>
 
 <template>
   <div class="dropdown-nav">
-    <div class="profile-container">
+    <div class="profile-container" @click="toggleDropdown">
       <div class="profile-wrap">
         <div class="profile-container-image">
           <img src="" alt="user profile image" />
@@ -16,11 +23,16 @@ import DropdownBtn from '@/components/DropdownBtn.vue'
       </div>
 
       <div>
-        <img class="dropdown-arrow" src="@/assets/icons/dropdown-arrow.svg" alt="dropdown arrow" />
+        <img 
+          class="dropdown-arrow" 
+          :class="{ 'rotated': isDropdownOpen }"
+          src="@/assets/icons/dropdown-arrow.svg" 
+          alt="dropdown arrow" 
+        />
       </div>
     </div>
 
-    <div class="dropdown-container">
+    <div class="dropdown-container" :class="{ 'hidden': !isDropdownOpen }">
       <div class="dropdown-top">
         <div class="dropdown-section">
           <div class="dropdown-heading">
@@ -55,7 +67,9 @@ import DropdownBtn from '@/components/DropdownBtn.vue'
         </div>
       </div>
       <div class="dropdown-bottom">
-        
+        <div class="btn-main">
+            <h2>Log ud</h2>
+        </div>
       </div>
     </div>
   </div>
@@ -67,11 +81,17 @@ import DropdownBtn from '@/components/DropdownBtn.vue'
   padding: 16px;
   border-radius: 24px;
   background-color: $background-dropdown;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-container {
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
 }
 
 .profile-wrap {
@@ -82,6 +102,11 @@ import DropdownBtn from '@/components/DropdownBtn.vue'
 
 .dropdown-arrow {
   width: 24px;
+  transition: transform 0.3s ease;
+  
+  &.rotated {
+    transform: rotate(180deg);
+  }
 }
 
 .profile-container-image {
@@ -100,6 +125,25 @@ img {
   flex-direction: column;
   gap: 32px;
   padding-top: 32px;
+  flex: 1;
+  box-sizing: border-box;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  
+  &.hidden {
+    padding-top: 0;
+    gap: 0;
+    flex: 0;
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.dropdown-top {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .dropdown-section {
@@ -118,5 +162,11 @@ img {
   width: 100%;
   height: 1px;
   background-color: $text-gray;
+}
+
+.btn-main {
+    background-color: $background-primary;
+    padding: 16px;
+    border-radius: 24px;
 }
 </style>
