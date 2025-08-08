@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
     selectedText: {
@@ -9,6 +9,10 @@ const props = defineProps({
     unselectedOptions: {
         type: Array,
         default: () => ['Option 2', 'Option 3']
+    },
+    closeSignal: {
+        type: Number,
+        default: 0
     }
 })
 
@@ -17,6 +21,13 @@ const isOpen = ref(false)
 const toggleDropdown = () => {
     isOpen.value = !isOpen.value
 }
+
+watch(
+    () => props.closeSignal,
+    () => {
+        isOpen.value = false
+    }
+)
 </script>
 
 <template>

@@ -10,7 +10,7 @@ const toggleDropdown = () => {
 </script>
 
 <template>
-  <div class="dropdown-nav">
+  <div class="dropdown-nav" :class="{ open: isDropdownOpen }">
     <div class="profile-container" @click="toggleDropdown">
       <div class="profile-wrap">
         <div class="profile-container-image">
@@ -32,43 +32,47 @@ const toggleDropdown = () => {
       </div>
     </div>
 
-    <div class="dropdown-container" :class="{ 'hidden': !isDropdownOpen }">
-      <div class="dropdown-top">
-        <div class="dropdown-section">
-          <div class="dropdown-heading">
-            <h1>Kampagne</h1>
-            <div class="heading-line"></div>
+    <div class="dropdown-container" :class="{ 'is-open': isDropdownOpen }">
+      <div class="dropdown-content">
+        <div class="dropdown-content-inner">
+          <div class="dropdown-top">
+            <div class="dropdown-section">
+              <div class="dropdown-heading">
+                <h1>Kampagne</h1>
+                <div class="heading-line"></div>
+              </div>
+
+              <DropdownBtn
+                selectedText="Solcelle Gruppen"
+                :unselectedOptions="['Waow Fiber', 'Visa Cashback']"
+              />
+            </div>
+
+            <div class="dropdown-section">
+              <div class="dropdown-heading">
+                <h1>Arkiv</h1>
+                <div class="heading-line"></div>
+              </div>
+
+              <DropdownBtn
+                selectedText="07/29/2025, 10:34 - 10:50"
+                :unselectedOptions="['Åben transcript', 'Slet transcript']"
+              />
+              <DropdownBtn
+                selectedText="07/29/2025, 10:02 - 10:23"
+                :unselectedOptions="['Åben transcript', 'Slet transcript']"
+              />
+              <DropdownBtn
+                selectedText="07/29/2025, 09:43 - 09:58"
+                :unselectedOptions="['Åben transcript', 'Slet transcript']"
+              />
+            </div>
           </div>
-
-          <DropdownBtn
-            selectedText="Solcelle Gruppen"
-            :unselectedOptions="['Waow Fiber', 'Visa Cashback']"
-          />
-        </div>
-
-        <div class="dropdown-section">
-          <div class="dropdown-heading">
-            <h1>Arkiv</h1>
-            <div class="heading-line"></div>
+          <div class="dropdown-bottom">
+            <div class="btn-main">
+                <h2>Log ud</h2>
+            </div>
           </div>
-
-          <DropdownBtn
-            selectedText="07/29/2025, 10:34 - 10:50"
-            :unselectedOptions="['Åben transcript', 'Slet transcript']"
-          />
-          <DropdownBtn
-            selectedText="07/29/2025, 10:02 - 10:23"
-            :unselectedOptions="['Åben transcript', 'Slet transcript']"
-          />
-          <DropdownBtn
-            selectedText="07/29/2025, 09:43 - 09:58"
-            :unselectedOptions="['Åben transcript', 'Slet transcript']"
-          />
-        </div>
-      </div>
-      <div class="dropdown-bottom">
-        <div class="btn-main">
-            <h2>Log ud</h2>
         </div>
       </div>
     </div>
@@ -81,10 +85,13 @@ const toggleDropdown = () => {
   padding: 16px;
   border-radius: 24px;
   background-color: $background-dropdown;
-  height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+}
+
+.dropdown-nav.open {
+  height: 100%;
 }
 
 .profile-container {
@@ -121,23 +128,40 @@ img {
 }
 
 .dropdown-container {
+  display: grid;
+  grid-template-rows: 0fr;
+  padding-top: 0;
+  transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1), padding-top 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.dropdown-container.is-open {
+  grid-template-rows: 1fr;
+  padding-top: 32px;
+  flex: 1;
+  pointer-events: auto;
+}
+
+.dropdown-content {
+  overflow: hidden;
+}
+
+.dropdown-content-inner {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  padding-top: 32px;
-  flex: 1;
-  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  height: 100%;
+}
+
+.dropdown-container.is-open .dropdown-content-inner {
+  opacity: 1;
+  transform: translateY(0);
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  
-  &.hidden {
-    padding-top: 0;
-    gap: 0;
-    flex: 0;
-    height: 0;
-    opacity: 0;
-  }
 }
 
 .dropdown-top {
