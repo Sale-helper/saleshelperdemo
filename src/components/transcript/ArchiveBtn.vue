@@ -18,7 +18,6 @@ const buttonClasses = computed(() => [
   props.disabled ? 'archive-btn--disabled' : 'archive-btn--enabled',
 ])
 
-// Width collapse/expand transition hooks (also animates horizontal padding)
 function onEnter(el) {
   const cs = getComputedStyle(el)
   const paddingLeft = parseFloat(cs.paddingLeft) || 0
@@ -26,7 +25,6 @@ function onEnter(el) {
   el.dataset.pl = String(paddingLeft)
   el.dataset.pr = String(paddingRight)
 
-  // Set to auto to measure natural width including padding without constraints from flex
   const previousWidth = el.style.width
   el.style.width = 'auto'
   const targetWidth = el.getBoundingClientRect().width

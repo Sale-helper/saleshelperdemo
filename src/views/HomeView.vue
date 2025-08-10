@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import DropdownNav from '@/components/dropdown-menu/DropdownNav.vue'
-import RecordBtn from '@/components/RecordBtn.vue'
-import ArchiveBtn from '@/components/ArchiveBtn.vue'
+import RecordBtn from '@/components/transcript/RecordBtn.vue'
+import ArchiveBtn from '@/components/transcript/ArchiveBtn.vue'
+import Transcript from '@/components/transcript/Transcript.vue'
 
 const isRecording = ref(false)
 const elapsedSeconds = ref(0)
@@ -12,7 +13,6 @@ let timerId = null
 function toggleRecording() {
   isRecording.value = !isRecording.value
   if (isRecording.value) {
-    // Starting a new recording resets archived state
     hasArchived.value = false
     startTimer()
   } else {
@@ -42,8 +42,8 @@ function formatTime(totalSeconds) {
 function archiveCurrent() {
   // TODO: Integrate with repository/store to persist archive action
   // Placeholder for now
-  console.log('Archive current transcript')
   hasArchived.value = true
+  elapsedSeconds.value = 0
 }
 </script>
 
@@ -61,6 +61,7 @@ function archiveCurrent() {
         />
         <ArchiveBtn class="sidebar__archive-button" :disabled="isRecording || hasArchived" @archive="archiveCurrent" />
       </div>
+      <Transcript />
     </div>
   </div>
 </template>
@@ -73,19 +74,23 @@ function archiveCurrent() {
   height: 100vh;
   background-color: #1a1c21;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 
   &__buttom {
+    display: flex;
+    flex-direction: column;
     margin: 0 16px;
+    padding-top: 114px;
+    gap: 24px;
+    flex: 1;
+    min-height: 0; // so children like transcript can scroll
   }
 
   &__record-wrap {
     display: flex;
     align-items: center;
     gap: 12px;
-  }
-
-  &__buttom {
-    padding-top: 114px;
   }
 }
 </style>

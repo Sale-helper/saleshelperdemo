@@ -115,6 +115,7 @@ const toggleDropdown = () => {
     width: 50px;
     height: 50px;
     background-color: aqua;
+    border-radius: 100%;
 
     img {
       width: 50px;
@@ -138,6 +139,8 @@ const toggleDropdown = () => {
     transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1),
       padding-top 220ms cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
+    // Allow children to shrink for internal scrolling
+    min-height: 0;
 
     &--open {
       grid-template-rows: 1fr;
@@ -149,16 +152,18 @@ const toggleDropdown = () => {
 
   &__content {
     overflow: hidden;
+    min-height: 0;
   }
 
   &__content-inner {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 16px;
     opacity: 0;
     transform: translateY(-6px);
     transition: opacity 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
     height: 100%;
+    min-height: 0;
   }
 
   &__container--open &__content-inner {
@@ -173,6 +178,18 @@ const toggleDropdown = () => {
     display: flex;
     flex-direction: column;
     gap: 32px;
+    // Make this region take remaining space and become scrollable
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    // Hide scrollbar but keep scroll functionality
+    -ms-overflow-style: none; // IE and Edge
+    scrollbar-width: none; // Firefox
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
   }
 
   &__section {
