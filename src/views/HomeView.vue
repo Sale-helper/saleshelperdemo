@@ -4,6 +4,7 @@ import DropdownNav from '@/components/dropdown-menu/DropdownNav.vue'
 import RecordBtn from '@/components/transcript/RecordBtn.vue'
 import ArchiveBtn from '@/components/transcript/ArchiveBtn.vue'
 import Transcript from '@/components/transcript/Transcript.vue'
+import Sidebar from '@/components/layout/Sidebar.vue'
 
 const isRecording = ref(false)
 const elapsedSeconds = ref(0)
@@ -40,57 +41,35 @@ function formatTime(totalSeconds) {
 }
 
 function archiveCurrent() {
-  // TODO: Integrate with repository/store to persist archive action
-  // Placeholder for now
   hasArchived.value = true
   elapsedSeconds.value = 0
 }
 </script>
 
 <template>
-  <div class="sidebar">
-    <DropdownNav />
-    <div class="sidebar__buttom">
-      <div class="sidebar__record-wrap">
-        <RecordBtn
-          :is-recording="isRecording"
-          :formatted-time="formatTime(elapsedSeconds)"
-          status-recording-text="Optager"
-          status-stopped-text="Stoppet"
-          @toggle="toggleRecording"
-        />
-        <ArchiveBtn class="sidebar__archive-button" :disabled="isRecording || hasArchived" @archive="archiveCurrent" />
-      </div>
-      <Transcript />
+  <Sidebar>
+    <template #header>
+      <DropdownNav />
+    </template>
+
+    <div class="sidebar__record-wrap">
+      <RecordBtn
+        :is-recording="isRecording"
+        :formatted-time="formatTime(elapsedSeconds)"
+        status-recording-text="Optager"
+        status-stopped-text="Stoppet"
+        @toggle="toggleRecording"
+      />
+      <ArchiveBtn class="sidebar__archive-button" :disabled="isRecording || hasArchived" @archive="archiveCurrent" />
     </div>
-  </div>
+    <Transcript />
+  </Sidebar>
 </template>
 
 <style scoped lang="scss">
-.sidebar {
-  position: relative;
-  box-sizing: border-box;
-  width: 400px;
-  height: 100vh;
-  background-color: #1a1c21;
-  flex-shrink: 0;
+.sidebar__record-wrap {
   display: flex;
-  flex-direction: column;
-
-  &__buttom {
-    display: flex;
-    flex-direction: column;
-    margin: 0 16px;
-    padding-top: 114px;
-    gap: 24px;
-    flex: 1;
-    min-height: 0; // so children like transcript can scroll
-  }
-
-  &__record-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  align-items: center;
+  gap: 12px;
 }
 </style>

@@ -3,7 +3,7 @@
 <template>
   <div class="transcript">
     <div class="transcript__heading">
-      <h1>Transcript</h1>
+      <h2>Transcript</h2>
       <div class="transcript__heading-line"></div>
     </div>
     <div class="transcript__text">
