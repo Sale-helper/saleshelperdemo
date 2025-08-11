@@ -92,6 +92,7 @@ const toggleDropdown = () => {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  z-index: 10; // Ensure dropdown appears above transcript
 
   &--open {
     height: -webkit-fill-available;
