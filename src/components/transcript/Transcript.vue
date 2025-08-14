@@ -49,6 +49,52 @@ const visibleTranscripts = computed(() => {
   )
 })
 
+// Typewriter effect state
+const typewriterStates = ref(new Map())
+const typewriterSpeed = 30 // milliseconds per character
+
+// Function to start typewriter effect for a new entry
+function startTypewriter(entryId, fullText) {
+  if (typewriterStates.value.has(entryId)) return
+  
+  typewriterStates.value.set(entryId, {
+    currentText: '',
+    fullText: fullText,
+    isComplete: false,
+    currentIndex: 0
+  })
+  
+  const typeNextChar = () => {
+    const state = typewriterStates.value.get(entryId)
+    if (!state || state.isComplete) return
+    
+    if (state.currentIndex < state.fullText.length) {
+      state.currentText += state.fullText[state.currentIndex]
+      state.currentIndex++
+      setTimeout(typeNextChar, typewriterSpeed)
+    } else {
+      state.isComplete = true
+    }
+  }
+  
+  typeNextChar()
+}
+
+// Watch for new transcript entries to start typewriter effect
+watch(visibleTranscripts, (newTranscripts, oldTranscripts) => {
+  if (!oldTranscripts) return
+  
+  // Find new entries that weren't in the old list
+  newTranscripts.forEach(entry => {
+    const entryId = `${entry.name}-${entry.ms_after_start}`
+    if (!oldTranscripts.some(oldEntry => 
+      `${oldEntry.name}-${oldEntry.ms_after_start}` === entryId
+    )) {
+      startTypewriter(entryId, entry.text)
+    }
+  })
+}, { deep: true })
+
 // Auto-scroll to bottom when new entries appear
 const transcriptContainer = ref(null)
 const isUserScrolling = ref(false)
@@ -114,17 +160,28 @@ import { nextTick } from 'vue'
       class="transcript__text"
       @scroll="handleScroll"
     >
-      <div 
-        v-for="(entry, index) in visibleTranscripts" 
-        :key="index"
-        class="transcript__person"
+      <TransitionGroup 
+        name="transcript-entry"
+        tag="div"
+        class="transcript__entries"
       >
-        <h3>{{ entry.name }}</h3>
-        <p>{{ entry.text }}</p>
-        <div class="transcript__timestamp">
-          {{ Math.floor(entry.ms_after_start / 1000) }}s
+        <div 
+          v-for="(entry, index) in visibleTranscripts" 
+          :key="`${entry.name}-${entry.ms_after_start}-${index}`"
+          class="transcript__person"
+        >
+          <h3>{{ entry.name }}</h3>
+          <p class="transcript__text-content">
+            <span v-if="typewriterStates.get(`${entry.name}-${entry.ms_after_start}`)">
+              {{ typewriterStates.get(`${entry.name}-${entry.ms_after_start}`).currentText }}
+            </span>
+            <span v-else>{{ entry.text }}</span>
+          </p>
+          <div class="transcript__timestamp">
+            {{ Math.floor(entry.ms_after_start / 1000) }}s
+          </div>
         </div>
-      </div>
+      </TransitionGroup>
       
       <div v-if="visibleTranscripts.length === 0" class="transcript__waiting">
         <p>Venter på første transcript...</p>
@@ -195,6 +252,12 @@ import { nextTick } from 'vue'
     }
   }
 
+  &__entries {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
   &__person {
     position: relative;
     padding: 12px;
@@ -213,10 +276,50 @@ import { nextTick } from 'vue'
     }
   }
 
+  &__text-content {
+    position: relative;
+    min-height: 1.5em; // Maintain consistent height during typing
+  }
+
+  &__cursor {
+    color: $text-purple;
+    font-weight: bold;
+    animation: blink 1s infinite;
+  }
+
   &__timestamp {
     font-size: 12px;
     color: $text-gray;
     font-weight: 500;
   }
+}
+
+// Cursor blink animation
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+// Transcript entry animations
+.transcript-entry-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transcript-entry-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transcript-entry-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.transcript-entry-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+.transcript-entry-move {
+  transition: transform 0.3s ease;
 }
 </style>

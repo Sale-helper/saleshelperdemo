@@ -39,7 +39,11 @@ const handleGenerateQuestion = (question) => {
       />
     </div>
     <div class="main__bottom">
-      <QuestionBtn @generateQuestion="handleGenerateQuestion" />
+      <div class="main__btn-wrap">
+        <QuestionBtn @generateQuestion="handleGenerateQuestion" />
+        <QuestionBtn @generateQuestion="handleGenerateQuestion" />
+
+      </div>
       <QuestionInput />
     </div>
   </div>
@@ -63,6 +67,11 @@ const handleGenerateQuestion = (question) => {
   &__bottom {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+  }
+
+  &__btn-wrap {
+    display: flex;
     gap: 16px;
   }
 
