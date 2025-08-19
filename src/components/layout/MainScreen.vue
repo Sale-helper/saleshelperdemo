@@ -21,10 +21,23 @@ const handleGenerateQuestion = (question) => {
   const newDropdown = {
     id: Date.now(),
     question: question,
-    answer: answer
+    answer: answer,
+    loading: true,
+    initiallyOpen: true
   }
   
   questionDropdowns.value.unshift(newDropdown)
+
+  // Clear loading after a short delay to reveal the answer
+  setTimeout(() => {
+    const idx = questionDropdowns.value.findIndex(d => d.id === newDropdown.id)
+    if (idx !== -1) {
+      questionDropdowns.value[idx] = {
+        ...questionDropdowns.value[idx],
+        loading: false
+      }
+    }
+  }, 700)
 }
 </script>
 
@@ -36,6 +49,8 @@ const handleGenerateQuestion = (question) => {
         :key="dropdown.id"
         :question="dropdown.question"
         :answer="dropdown.answer"
+        :loading="dropdown.loading"
+        :initiallyOpen="dropdown.initiallyOpen"
       />
     </div>
     <div class="main__bottom">
@@ -53,21 +68,25 @@ const handleGenerateQuestion = (question) => {
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   width: 100%;
   height: 100vh;
   padding: 16px;
+  gap: 16px;
 
   &__top {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   &__bottom {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex: 0 0 auto;
   }
 
   &__btn-wrap {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   elapsedMs: { type: Number, default: 0 },
@@ -41,106 +41,95 @@ const transcriptData = ref([
 ])
 
 // Computed property to show only transcript entries that should be visible based on current time
+// Newest entries appear at the top
 const visibleTranscripts = computed(() => {
   if (!props.isRecording) return []
   
-  return transcriptData.value.filter(entry => 
-    entry.ms_after_start <= props.elapsedMs
-  )
+  return transcriptData.value
+    .filter(entry => entry.ms_after_start <= props.elapsedMs)
+    .reverse() // Newest first
 })
 
-// Typewriter effect state
+// Simple typewriter effect
 const typewriterStates = ref(new Map())
-const typewriterSpeed = 30 // milliseconds per character
 
-// Function to start typewriter effect for a new entry
-function startTypewriter(entryId, fullText) {
+function startTypewriter(entryId, text) {
   if (typewriterStates.value.has(entryId)) return
   
-  typewriterStates.value.set(entryId, {
-    currentText: '',
-    fullText: fullText,
-    isComplete: false,
-    currentIndex: 0
-  })
+  let currentIndex = 0
+  const fullText = text
   
   const typeNextChar = () => {
-    const state = typewriterStates.value.get(entryId)
-    if (!state || state.isComplete) return
-    
-    if (state.currentIndex < state.fullText.length) {
-      state.currentText += state.fullText[state.currentIndex]
-      state.currentIndex++
-      setTimeout(typeNextChar, typewriterSpeed)
-    } else {
-      state.isComplete = true
+    if (currentIndex < fullText.length) {
+      typewriterStates.value.set(entryId, fullText.slice(0, currentIndex + 1))
+      currentIndex++
+      setTimeout(typeNextChar, 30)
     }
   }
   
   typeNextChar()
 }
 
-// Watch for new transcript entries to start typewriter effect
-watch(visibleTranscripts, (newTranscripts, oldTranscripts) => {
-  if (!oldTranscripts) return
-  
-  // Find new entries that weren't in the old list
-  newTranscripts.forEach(entry => {
+// Start typewriter for new entries
+const processedEntries = ref(new Set())
+
+function processNewEntries() {
+  visibleTranscripts.value.forEach(entry => {
     const entryId = `${entry.name}-${entry.ms_after_start}`
-    if (!oldTranscripts.some(oldEntry => 
-      `${oldEntry.name}-${oldEntry.ms_after_start}` === entryId
-    )) {
+    if (!processedEntries.value.has(entryId)) {
+      processedEntries.value.add(entryId)
       startTypewriter(entryId, entry.text)
     }
   })
-}, { deep: true })
-
-// Auto-scroll to bottom when new entries appear
-const transcriptContainer = ref(null)
-const isUserScrolling = ref(false)
-const lastScrollTop = ref(0)
-
-// Check if user is at bottom of transcript
-function isAtBottom() {
-  if (!transcriptContainer.value) return true
-  const { scrollTop, scrollHeight, clientHeight } = transcriptContainer.value
-  return Math.abs(scrollHeight - clientHeight - scrollTop) < 10 // 10px tolerance
 }
 
-// Handle scroll events to detect user scrolling
+// Watch for changes and process new entries
+import { watch } from 'vue'
+watch(visibleTranscripts, () => {
+  processNewEntries()
+}, { immediate: true })
+
+// Auto-scroll to top when new entries appear
+const transcriptContainer = ref(null)
+const isUserScrolling = ref(false)
+let scrollTimeout = null
+
 function handleScroll() {
   if (!transcriptContainer.value) return
   
-  const currentScrollTop = transcriptContainer.value.scrollTop
-  const isScrollingUp = currentScrollTop < lastScrollTop.value
+  const { scrollTop } = transcriptContainer.value
+  const isAtTop = scrollTop < 10
   
-  // If user is scrolling up, mark that they're manually scrolling
-  if (isScrollingUp && !isAtBottom()) {
-    isUserScrolling.value = true
+  // Clear existing timeout
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
   }
   
-  // If user scrolls to bottom, allow auto-scroll again
-  if (isAtBottom()) {
+  // If user scrolls away from top, mark as manually scrolling
+  if (!isAtTop) {
+    isUserScrolling.value = true
+  } else {
+    // If user returns to top, allow auto-scroll again
     isUserScrolling.value = false
   }
-  
-  lastScrollTop.value = currentScrollTop
 }
 
-watch(visibleTranscripts, () => {
-  // Only auto-scroll if user is not manually scrolling
-  if (!isUserScrolling.value) {
-    // Use nextTick to ensure DOM is updated before scrolling
-    nextTick(() => {
-      if (transcriptContainer.value) {
-        transcriptContainer.value.scrollTop = transcriptContainer.value.scrollHeight
-      }
+function scrollToTop() {
+  if (!isUserScrolling.value && transcriptContainer.value) {
+    transcriptContainer.value.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     })
   }
-}, { deep: true })
+}
 
-// Import nextTick
-import { nextTick } from 'vue'
+// Watch for new entries and scroll to top
+watch(visibleTranscripts, () => {
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
+  }
+  scrollTimeout = setTimeout(scrollToTop, 200)
+}, { deep: true })
 </script>
 
 <template>
@@ -160,28 +149,21 @@ import { nextTick } from 'vue'
       class="transcript__text"
       @scroll="handleScroll"
     >
-      <TransitionGroup 
-        name="transcript-entry"
-        tag="div"
-        class="transcript__entries"
-      >
+      <div class="transcript__entries">
         <div 
           v-for="(entry, index) in visibleTranscripts" 
-          :key="`${entry.name}-${entry.ms_after_start}-${index}`"
+          :key="`${entry.name}-${entry.ms_after_start}`"
           class="transcript__person"
         >
           <h3>{{ entry.name }}</h3>
           <p class="transcript__text-content">
-            <span v-if="typewriterStates.get(`${entry.name}-${entry.ms_after_start}`)">
-              {{ typewriterStates.get(`${entry.name}-${entry.ms_after_start}`).currentText }}
-            </span>
-            <span v-else>{{ entry.text }}</span>
+            {{ typewriterStates.get(`${entry.name}-${entry.ms_after_start}`) || entry.text }}
           </p>
           <div class="transcript__timestamp">
             {{ Math.floor(entry.ms_after_start / 1000) }}s
           </div>
         </div>
-      </TransitionGroup>
+      </div>
       
       <div v-if="visibleTranscripts.length === 0" class="transcript__waiting">
         <p>Venter på første transcript...</p>
@@ -194,13 +176,13 @@ import { nextTick } from 'vue'
 @import '@/assets/main.scss';
 
 .transcript {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    height: 100%;
-    min-height: 0;
-    padding-bottom: 24px;
-    z-index: 1; // Ensure transcript stays below dropdown
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 24px;
+  z-index: 1;
 
   &__heading {
     display: flex;
@@ -240,13 +222,13 @@ import { nextTick } from 'vue'
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding-right: 4px; // Add some padding for the hidden scrollbar
+    padding-right: 4px;
     
     // Hide scrollbar while allowing scroll
-    -ms-overflow-style: none; // IE and Edge
-    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 
-    &::-webkit-scrollbar { // Chrome, Safari, Opera
+    &::-webkit-scrollbar {
       width: 0;
       height: 0;
     }
@@ -263,7 +245,7 @@ import { nextTick } from 'vue'
     padding: 12px;
     background-color: rgba(45, 46, 64, 0.3);
     border-radius: 12px;
-    z-index: 1; // Ensure person elements stay below dropdown
+    z-index: 1;
     
     h3 {
       margin-bottom: 4px;
@@ -278,13 +260,7 @@ import { nextTick } from 'vue'
 
   &__text-content {
     position: relative;
-    min-height: 1.5em; // Maintain consistent height during typing
-  }
-
-  &__cursor {
-    color: $text-purple;
-    font-weight: bold;
-    animation: blink 1s infinite;
+    min-height: 1.5em;
   }
 
   &__timestamp {
@@ -292,34 +268,5 @@ import { nextTick } from 'vue'
     color: $text-gray;
     font-weight: 500;
   }
-}
-
-// Cursor blink animation
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-// Transcript entry animations
-.transcript-entry-enter-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.transcript-entry-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.transcript-entry-enter-from {
-  opacity: 0;
-  transform: translateY(20px) scale(0.95);
-}
-
-.transcript-entry-leave-to {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.98);
-}
-
-.transcript-entry-move {
-  transition: transform 0.3s ease;
 }
 </style>
