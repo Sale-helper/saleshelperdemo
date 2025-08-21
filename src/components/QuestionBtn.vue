@@ -1,17 +1,41 @@
 <script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  question: { type: String, default: "Hvordan beregner jeg kundens årlige forbrug ud fra de informationer?" },
+  timestamp: { type: Number, default: 0 }, // Time in milliseconds when button should appear
+  elapsedMs: { type: Number, default: 0 }, // Current elapsed time from recording
+  isRecording: { type: Boolean, default: false } // Whether recording is active
+})
+
 const emit = defineEmits(['generateQuestion'])
 
-const question = "Er du bøsse?"
+// Only show button when recording has reached the specified timestamp
+const isVisible = computed(() => {
+  // If not recording, don't show button
+  if (!props.isRecording) return false
+  
+  // If we've reached the timestamp, show the button
+  if (props.elapsedMs >= props.timestamp) return true
+  
+  return false
+})
 
 const handleClick = () => {
-  emit('generateQuestion', question)
+  emit('generateQuestion', props.question)
 }
 </script>
 
 <template>
-  <div class="question-btn" @click="handleClick">
-    <p>{{ question }}</p>
-  </div>
+  <Transition name="fade-slide">
+    <div 
+      v-if="isVisible" 
+      class="question-btn" 
+      @click="handleClick"
+    >
+      <p>{{ question }}</p>
+    </div>
+  </Transition>
 </template>
 
 <style scoped lang="scss">
@@ -35,5 +59,19 @@ const handleClick = () => {
     }
 }
 
- 
+/* Transition animations */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
 </style>

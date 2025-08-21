@@ -32,6 +32,41 @@ watchEffect(() => {
 const toggleDropdown = () => {
     isOpen.value = !isOpen.value
 }
+
+const formatAnswer = (answer) => {
+    // Convert plain text with line breaks to HTML with proper formatting
+    if (!answer) return '';
+    
+    // Split by double line breaks to separate sections
+    const sections = answer.split('\n\n');
+    
+    // Process each section
+    const formattedSections = sections.map(section => {
+        const lines = section.trim().split('\n');
+        
+        if (lines.length === 0) return '';
+        
+        // First line is the heading (bold)
+        const heading = lines[0];
+        const subLines = lines.slice(1);
+        
+        // Format the heading as bold
+        const formattedHeading = `<strong>${heading}</strong>`;
+        
+        // Format sub-lines (questions)
+        const formattedSubLines = subLines.map(line => {
+            if (line.trim().startsWith('–')) {
+                return `<div class="sub-question">${line.trim()}</div>`;
+            }
+            return `<div>${line.trim()}</div>`;
+        }).join('');
+        
+        // Combine heading and sub-lines
+        return `<div class="answer-section">${formattedHeading}${formattedSubLines}</div>`;
+    });
+    
+    return formattedSections.join('');
+}
 </script>
 
 <template>
@@ -52,7 +87,7 @@ const toggleDropdown = () => {
                     <p>Genererer svar...</p>
                 </div>
                 <div v-else class="question-dropdown__answer">
-                    <p>{{ answer }}</p>
+                    <div v-html="formatAnswer(answer)"></div>
                 </div>
             </div>
         </transition>
@@ -115,6 +150,33 @@ const toggleDropdown = () => {
         border-radius: 16px;
         background-color: #2D2E40;
         line-height: 1.6;
+        
+        .answer-section {
+            margin-bottom: 16px;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+            
+            strong {
+                display: block;
+                font-weight: 600;
+                color: #E6E6E6;
+                margin-bottom: 8px;
+                font-size: 16px;
+            }
+            
+            .sub-question {
+                margin-left: 16px;
+                margin-bottom: 4px;
+                color: $text-gray;
+                font-size: 14px;
+                
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
         
         p {
             margin: 0;

@@ -11,20 +11,39 @@ const isRecording = ref(false)
 const elapsedSeconds = ref(0)
 const elapsedMs = ref(0)
 const hasArchived = ref(true)
+const isNewRecording = ref(true) // Track if this is a new recording
 let timerId = null
+
+// Reference to RecordBtn component to access resetAudio function
+const recordBtnRef = ref(null)
 
 function toggleRecording() {
   isRecording.value = !isRecording.value
   if (isRecording.value) {
     hasArchived.value = false
+    if (isNewRecording.value) {
+      // Reset timer only for new recordings
+      elapsedMs.value = 0
+      elapsedSeconds.value = 0
+      console.log('Starting new recording, timer reset')
+    } else {
+      console.log('Resuming recording from pause')
+    }
     startTimer()
   } else {
     stopTimer()
+    // Mark that this is no longer a new recording
+    isNewRecording.value = false
   }
 }
 
 function startTimer() {
-  if (timerId) return
+  // Clear any existing timer first
+  if (timerId) {
+    clearInterval(timerId)
+    timerId = null
+  }
+  
   timerId = setInterval(() => {
     elapsedMs.value += 100
     // Update seconds every 1000ms
@@ -50,6 +69,12 @@ function archiveCurrent() {
   hasArchived.value = true
   elapsedSeconds.value = 0
   elapsedMs.value = 0
+  isNewRecording.value = true // Reset to new recording state
+  
+  // Reset audio to beginning when archiving
+  if (recordBtnRef.value && recordBtnRef.value.resetAudio) {
+    recordBtnRef.value.resetAudio()
+  }
 }
 </script>
 
@@ -62,6 +87,7 @@ function archiveCurrent() {
 
       <div class="sidebar__record-wrap">
         <RecordBtn
+          ref="recordBtnRef"
           :is-recording="isRecording"
           :formatted-time="formatTime(elapsedSeconds)"
           status-recording-text="Optager"
@@ -76,7 +102,10 @@ function archiveCurrent() {
       </div>
       <Transcript :elapsed-ms="elapsedMs" :is-recording="isRecording" />
     </Sidebar>
-    <MainScreen />
+    <MainScreen 
+      :is-recording="isRecording"
+      :elapsed-ms="elapsedMs"
+    />
   </div>
 </template>
 

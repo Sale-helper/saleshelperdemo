@@ -14,7 +14,7 @@ const toggleDropdown = () => {
     <div class="dropdown-nav__profile" @click="toggleDropdown">
       <div class="dropdown-nav__profile-wrap">
         <div class="dropdown-nav__profile-image">
-          <img src="" alt="user profile image" />
+          <img src="@/assets/icons/close-up-portrait-of-smiling-handsome-young-caucasian-man-face-looking-at-camera-on-isolated-light-gray-studio-background-photo.jpg" alt="user profile image" />
         </div>
         <div>
           <h3>Anders Simonsen</h3>
@@ -117,10 +117,13 @@ const toggleDropdown = () => {
     height: 50px;
     background-color: aqua;
     border-radius: 100%;
+    overflow: hidden;
 
     img {
       width: 50px;
       height: 50px;
+      border-radius: 100%;
+      object-fit: cover;
     }
   }
 
