@@ -49,4 +49,31 @@ But it's still recommended to test the production build with `test:e2e` before d
 npm run build
 npm run test:e2e
 ```
-# saleshelperdemo
+
+## Deployment to GitHub Pages
+
+This project is configured for automatic deployment to GitHub Pages.
+
+### Automatic Deployment (Recommended)
+
+1. **Enable GitHub Pages** in your repository settings:
+   - Go to Settings → Pages
+   - Set Source to "GitHub Actions"
+
+2. **Push to main branch**: The GitHub Actions workflow will automatically build and deploy your app.
+
+### Manual Deployment
+
+If you prefer manual deployment:
+
+```sh
+npm run deploy
+```
+
+This will build your project and deploy it to the `gh-pages` branch.
+
+### Important Notes
+
+- The app is configured to work with the repository name `saleshelperdemo` in the URL
+- If you change the repository name, update the `base` property in `vite.config.js`
+- The router uses hash mode for better GitHub Pages compatibility
