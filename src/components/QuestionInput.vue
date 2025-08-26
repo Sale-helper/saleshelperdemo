@@ -14,6 +14,7 @@ defineEmits(['update:modelValue', 'search']);
 </script>
 
 <template>
+  
   <div class="question-input">
     <input 
       class="question-input__input" 
