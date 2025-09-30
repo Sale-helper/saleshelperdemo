@@ -86,6 +86,12 @@ const handleGenerateQuestion = (question) => {
       />
     </div>
     <div class="main__bottom">
+      <div class="main__quick-btns">
+        <button class="quick-btn" type="button" @click="handleGenerateQuestion('Momentum')">Momentum</button>
+        <button class="quick-btn" type="button" @click="handleGenerateQuestion('Svar')">Svar</button>
+        <button class="quick-btn" type="button" @click="handleGenerateQuestion('Indvending')">Indvending</button>
+        <button class="quick-btn" type="button" @click="handleGenerateQuestion('Luk')">Luk</button>
+      </div>
       <div class="main__btn-wrap">
         <QuestionBtn 
           v-for="btn in questionButtons.filter(btn => !clickedButtons.includes(btn.question))" 
@@ -130,6 +136,25 @@ const handleGenerateQuestion = (question) => {
   &__btn-wrap {
     display: flex;
     gap: 16px;
+  }
+
+  &__quick-btns {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+.quick-btn {
+  background-color: #2D2E40;
+  color: #B8B9C5;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #292a3d;
   }
 }
 </style>
